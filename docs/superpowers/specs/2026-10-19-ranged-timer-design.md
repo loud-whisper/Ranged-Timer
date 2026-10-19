@@ -28,7 +28,7 @@ Out of scope: iPhone, Play Store publishing, accounts, network access, ads, anal
 - No database library. History is one small JSON file in app-private storage.
 - No chart library. The graph is drawn with Compose Canvas.
 - Target SDK: Android 16 (API 36). Minimum SDK: Android 13 (API 33).
-- Built on the Fedora workstation with the existing Android SDK at `~/Android/Sdk`.
+- Built with JDK 21 and the Android SDK command-line tools.
 
 ## Screens
 
@@ -176,7 +176,7 @@ All calculations live in pure Kotlin with no Android dependencies, so they can b
 ## Build, signing, and install
 
 - Repository: private `loud-whisper/Ranged-Timer`, local clone `~/git/Ranged-Timer`.
-- Release signing key: generated once, stored outside the repository in `/mnt/wdc/Gold/.secrets/ranged-timer/`. Key passwords are never committed. The README states the key location only. The owner keeps a second copy offline.
+- Release signing key: generated once, stored in a private folder outside the repository. Key passwords are never committed. The README states the key location only. The owner keeps a second copy offline.
 - Losing the key means updates require uninstalling, which erases history unless it was exported.
 - Install: the owner moves the APK to the phone (Drive, USB, or email), allows "install unknown apps" for the opening app, and may need to turn Samsung Auto Blocker off temporarily and accept a Play Protect warning.
 - Before building, verify the current status of Google's Android developer verification requirement for sideloaded apps in Canada, and plan the free personal-use route if it applies.

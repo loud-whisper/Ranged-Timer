@@ -6,7 +6,7 @@
 
 **Architecture:** A pure-Kotlin `core` package (models, random pick, statistics, cycles, JSON codec, recovery decisions) carries all logic that can be wrong silently and is unit tested on the JVM. A thin Android layer (`data`, `alarm`, `ui`) persists the JSON file, schedules one exact alarm, runs a short foreground alert service, and renders four Compose screens.
 
-**Tech Stack:** Kotlin, Jetpack Compose (Material 3), kotlinx.serialization, JUnit 4, Gradle wrapper, Android Gradle Plugin, JDK 21 (`~/.jdks/jdk-21.0.12.1+1`).
+**Tech Stack:** Kotlin, Jetpack Compose (Material 3), kotlinx.serialization, JUnit 4, Gradle wrapper, Android Gradle Plugin, JDK 21.
 
 **Spec:** `docs/superpowers/specs/2026-10-19-ranged-timer-design.md`
 
@@ -21,7 +21,7 @@
 - Outcomes: `completed`, `ended_early`, `interrupted`.
 - Windows: 7, 21, 30, 60, 90 days. Cycle length: 90 days.
 - Never use `AlarmManager.setAlarmClock()`; never use foreground service type `shortService`.
-- Signing key and passwords live only in `/mnt/wdc/Gold/.secrets/ranged-timer/`, never in the repository.
+- Signing key and passwords live only in a private folder outside the repository, never in the repository.
 - User-facing text: no emojis, no em or en dashes.
 
 ## Review Focus
@@ -40,7 +40,7 @@
 - Create: `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties`, `gradle/libs.versions.toml`, Gradle wrapper files, `.gitignore`, `app/build.gradle.kts`, `app/src/main/AndroidManifest.xml`, `app/src/main/java/com/loudwhisper/rangedtimer/MainActivity.kt` (placeholder text).
 
 - [ ] **Step 1:** Generate the wrapper with the cached Gradle distribution running on JDK 21; use current stable AGP, Kotlin, Compose BOM. Declare plugins: Android application, Kotlin Compose compiler, Kotlin serialization.
-- [ ] **Step 2:** `JAVA_HOME=~/.jdks/jdk-21.0.12.1+1 ./gradlew assembleDebug` succeeds.
+- [ ] **Step 2:** `./gradlew assembleDebug` (JDK 21) succeeds.
 - [ ] **Step 3:** Commit.
 
 ### Task 2: Core models and random pick
@@ -126,7 +126,7 @@ Decisions: bottom navigation with Home, History, Settings. Home: range fields wi
 
 ### Task 8: Release build, docs, Brain pointer
 
-- [ ] **Step 1:** Generate the release keystore in `/mnt/wdc/Gold/.secrets/ranged-timer/` (folder 700, files 600) with a random password stored in a 600 properties file beside it; `app/build.gradle.kts` reads it via a path from `~/.gradle/gradle.properties` or an environment variable, and the build still works without it for debug.
+- [ ] **Step 1:** Generate the release keystore in a private folder outside the repository (folder 700, files 600) with a random password stored in a 600 properties file beside it; `app/build.gradle.kts` reads it via a path from `~/.gradle/gradle.properties` or an environment variable, and the build still works without it for debug.
 - [ ] **Step 2:** `./gradlew testDebugUnitTest assembleRelease` passes; `apksigner verify --print-certs` succeeds; record APK size.
 - [ ] **Step 3:** Run on an emulator if one can be created; otherwise record that device testing is pending.
 - [ ] **Step 4:** Write `README.md` (purpose, build, install, key location, code map, real-phone checklist). Copy the APK to an owner-visible folder. Commit and push.
