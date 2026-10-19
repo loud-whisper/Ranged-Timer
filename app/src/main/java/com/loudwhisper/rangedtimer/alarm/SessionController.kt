@@ -10,6 +10,7 @@ import com.loudwhisper.rangedtimer.core.alarmMatches
 import com.loudwhisper.rangedtimer.core.complete
 import com.loudwhisper.rangedtimer.core.endEarly
 import com.loudwhisper.rangedtimer.core.labelFor
+import com.loudwhisper.rangedtimer.core.rememberCustom
 import com.loudwhisper.rangedtimer.core.onBoot
 import com.loudwhisper.rangedtimer.core.onOpen
 import com.loudwhisper.rangedtimer.core.pickSeconds
@@ -45,7 +46,7 @@ object SessionController {
                 label = labelFor(data.settings),
             )
             started = active
-            data.copy(activeSession = active)
+            data.copy(activeSession = active, settings = rememberCustom(data.settings, active.label))
         }
         started?.let {
             Scheduler.schedule(ctx, it.startElapsedMillis + it.pickedSeconds * 1000, it.id, isTest = false)

@@ -32,20 +32,9 @@ fun dateTimeOf(epochMillis: Long): String =
 
 fun dateOf(d: java.time.LocalDate): String = d.format(dateFormat)
 
-fun periodName(days: Int): String = when (days) {
-    7 -> "1 week"
-    21 -> "3 weeks"
-    30 -> "1 month"
-    60 -> "2 months"
-    90 -> "3 months"
-    else -> "$days days"
-}
+fun periodName(days: Int): String = "Last $days days"
 
-private fun previousName(days: Int): String = when (days) {
-    7 -> "week"
-    30 -> "month"
-    else -> periodName(days)
-}
+private fun previousName(days: Int): String = "$days days"
 
 /** "Up 6 min/day vs the previous 3 weeks" style sentence. */
 fun changeSentence(change: Double, days: Int): String {

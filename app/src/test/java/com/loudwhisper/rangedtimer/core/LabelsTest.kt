@@ -47,11 +47,34 @@ class LabelsTest {
     }
 
     @Test
-    fun `other name validation`() {
-        assertNull(validateOtherName("Guitar"))
-        assertNotNull(validateOtherName("   "))
-        assertNotNull(validateOtherName("reading"))
-        assertNotNull(validateOtherName("x".repeat(25)))
+    fun `label names are trimmed and built-in names are matched regardless of case`() {
+        assertEquals("Guitar", normalizeLabel("  Guitar "))
+        assertEquals("Reading", normalizeLabel("reading"))
+        assertNull(normalizeLabel("   "))
+        assertNull(normalizeLabel("x".repeat(25)))
+        assertNotNull(labelError(""))
+        assertNull(labelError("HIIT"))
+    }
+
+    @Test
+    fun `typed fourth label is normalized when a session starts`() {
+        assertEquals("Workout", labelFor(Settings(labelChoice = LabelChoice.OTHER, otherLabelName = "workout")))
+        assertEquals("Other", labelFor(Settings(labelChoice = LabelChoice.OTHER, otherLabelName = "  ")))
+    }
+
+    @Test
+    fun `recent custom names keep the newest five without duplicates or built-ins`() {
+        var st = Settings()
+        listOf("Cardio", "HIIT", "Guitar", "cardio", "Yoga", "Swim", "Reading", "Piano").forEach { st = rememberCustom(st, it) }
+        assertEquals(listOf("Piano", "Swim", "Yoga", "cardio", "Guitar"), st.recentCustomLabels)
+    }
+
+    @Test
+    fun `relabel changes only the chosen session`() {
+        val data = AppData(sessions = listOf(s("Cardio"), s("Meditation", LocalDate.of(2026, 10, 20))))
+        val id = data.sessions[0].id
+        val after = relabel(data, id, "HIIT")
+        assertEquals(listOf("HIIT", "Meditation"), after.sessions.map { it.label })
     }
 
     @Test

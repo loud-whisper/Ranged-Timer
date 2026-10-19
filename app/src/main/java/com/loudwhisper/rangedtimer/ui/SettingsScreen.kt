@@ -39,9 +39,6 @@ import androidx.compose.ui.unit.dp
 import com.loudwhisper.rangedtimer.alarm.Scheduler
 import com.loudwhisper.rangedtimer.core.AppData
 import com.loudwhisper.rangedtimer.core.Codec
-import com.loudwhisper.rangedtimer.core.MAX_LABEL_LENGTH
-import com.loudwhisper.rangedtimer.core.validateOtherName
-import androidx.compose.material3.OutlinedTextField
 import com.loudwhisper.rangedtimer.core.Theme
 import java.time.Instant
 import java.time.LocalDate
@@ -68,15 +65,12 @@ fun SettingsScreen(
     onImport: (String) -> Unit,
     onClearHistory: () -> Unit,
     onTest: () -> Unit,
-    onOtherName: (String) -> Unit,
     onExportReport: (Uri) -> Unit,
 ) {
     val ctx = LocalContext.current
     var importCandidate by remember { mutableStateOf<String?>(null) }
     var confirmClear by remember { mutableStateOf(false) }
     var testMessage by remember { mutableStateOf<String?>(null) }
-    var otherName by remember(data.settings.otherLabelName) { mutableStateOf(data.settings.otherLabelName) }
-    val otherError = validateOtherName(otherName)
     var message by remember { mutableStateOf<String?>(null) }
 
     val ringtonePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -172,29 +166,6 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-
-        Text("Labels", style = MaterialTheme.typography.titleLarge)
-        Text(
-            "Meditation, Reading and Workout are fixed. Rename the fourth label to anything you practice. " +
-                "Sessions keep the name they had when they ran.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = otherName,
-                onValueChange = { otherName = it.take(MAX_LABEL_LENGTH + 5) },
-                label = { Text("Fourth label") },
-                singleLine = true,
-                isError = otherError != null,
-                modifier = Modifier.weight(1f),
-            )
-            OutlinedButton(
-                onClick = { onOtherName(otherName.trim()); message = "Label saved." },
-                enabled = otherError == null && otherName.trim() != data.settings.otherLabelName,
-            ) { Text("Save") }
-        }
-        otherError?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
 
         Text("Theme", style = MaterialTheme.typography.titleLarge)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

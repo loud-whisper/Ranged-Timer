@@ -211,21 +211,63 @@ class AppFlowTest {
     }
 
     @Test
-    fun renamingOtherKeepsPastSessionNames() {
+    fun fourthLabelIsTypedOnTheTimerScreenAndRecentNamesArePickable() {
         compose.onNodeWithText("Other").performClick()
-        val first = SessionController.start(ctx)!!
-        SessionController.onAlarm(ctx, first.id, isTest = false)
-        assertEquals("Other", SessionController.store(ctx).load().sessions.single().label)
+        compose.onNodeWithText("Label name").performTextReplacement("Cardio")
+        compose.onNodeWithText("Start").performClick()
+        val cardio = SessionController.store(ctx).load().activeSession!!
+        assertEquals("Cardio", cardio.label)
+        SessionController.onAlarm(ctx, cardio.id, isTest = false)
+        compose.activityRule.scenario.recreate()
 
-        compose.onNodeWithText("Settings").performClick()
-        compose.onNodeWithText("Fourth label").performScrollTo().performTextReplacement("Guitar")
-        compose.onNodeWithText("Save").performClick()
+        compose.onNodeWithText("Label name").performTextReplacement("HIIT")
+        compose.onNodeWithText("Start").performClick()
+        val hiit = SessionController.store(ctx).load().activeSession!!
+        assertEquals("HIIT", hiit.label)
+        SessionController.onAlarm(ctx, hiit.id, isTest = false)
+        compose.activityRule.scenario.recreate()
+
+        val data = SessionController.store(ctx).load()
+        assertEquals(listOf("Cardio", "HIIT"), data.sessions.map { it.label })
+        assertEquals(listOf("HIIT", "Cardio"), data.settings.recentCustomLabels)
+
+        // Cardio is offered as a one-tap pick under the name box.
+        compose.onNodeWithText("Cardio").performClick()
+        compose.waitForIdle()
+        assertEquals("Cardio", SessionController.store(ctx).load().settings.otherLabelName)
+    }
+
+    @Test
+    fun emptyFourthLabelBlocksStart() {
+        compose.onNodeWithText("Other").performClick()
+        compose.onNodeWithText("Label name").performTextReplacement("")
+        compose.onNodeWithText("Enter a name.").assertIsDisplayed()
+        compose.onNodeWithText("Start").assertIsNotEnabled()
+    }
+
+    @Test
+    fun recordedSessionCanBeRelabelledFromHistory() {
+        val active = SessionController.start(ctx)!!
+        SessionController.onAlarm(ctx, active.id, isTest = false)
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("History").performClick()
+        compose.onAllNodesWithText("Meditation")[1].performScrollTo().performClick()
+        compose.onNodeWithText("Change label").assertIsDisplayed()
+        compose.onNodeWithText("Or type a name").performScrollTo().performTextReplacement("HIIT")
+        compose.onNodeWithText("Save").performScrollTo().performClick()
         compose.waitForIdle()
         val data = SessionController.store(ctx).load()
-        assertEquals("Guitar", data.settings.otherLabelName)
-        assertEquals("Other", data.sessions.single().label)
+        assertEquals("HIIT", data.sessions.single().label)
+        assertEquals(listOf("HIIT"), data.settings.recentCustomLabels)
+    }
 
-        compose.onNodeWithText("Timer").performClick()
-        compose.onNodeWithText("Guitar").assertIsDisplayed()
+    @Test
+    fun periodButtonsSayExactlyWhatTheyCount() {
+        val active = SessionController.start(ctx)!!
+        SessionController.onAlarm(ctx, active.id, isTest = false)
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("History").performClick()
+        compose.onNodeWithText("Last 7 days").assertIsDisplayed()
+        compose.onNodeWithText("Last 90 days").assertIsDisplayed()
     }
 }

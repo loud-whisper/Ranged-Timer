@@ -17,8 +17,9 @@ The timer gives one alert per session. It does not run a series of intervals.
 - Checks the phone's sound mode when the time comes: on Silent or Vibrate it vibrates, with sound on it plays the ringtone you chose and vibrates. It stops when you tap Stop or after 3 minutes.
 - Gives a short buzz when you press Start, so you know the session is running without looking.
 - Lets you end early by holding a button for 1.5 seconds (a quick tap does nothing). It records what you sat and shows what it had picked: "You sat 52 minutes. The timer had picked 74."
-- Keeps a history on the phone: average minutes per day over 1 week, 3 weeks, 1 month, 2 months and 3 months, days practiced, average session length, a daily graph with a 7-day trend line, and 90-day cycles you can compare with each other.
-- Tags each session with a label: Meditation, Reading, Workout, or a fourth one you name yourself. History can show everything or one label at a time.
+- Keeps a history on the phone: average minutes per day over the last 7, 21, 30, 60 and 90 days (rolling, counted back from today), days practiced, average session length, a daily graph with a 7-day trend line, and 90-day cycles you can compare with each other.
+- Tags each session with a label: Meditation, Reading, Workout, or a fourth one you type on the timer screen (Cardio one day, HIIT the next). Your last five names come back as one-tap picks. A session saved under the wrong label can be changed later from History.
+- Shows History for everything or one label at a time.
 - Exports a spreadsheet report (CSV) with one row per session: date, start time, label, minutes done, minutes picked and how it ended.
 - Exports and imports the full history as a backup file, and can clear it after a warning.
 - Has an OLED black dark theme and a light theme, or follows the phone.
@@ -96,7 +97,7 @@ Decisions that should not be undone by accident:
 - A session is saved the moment the alarm fires, so it counts even if Stop is never tapped.
 - Android 9 and later do not tell a stopped app when the phone shuts down. If the end passes while the phone is off, the session is recorded at its picked length and marked interrupted.
 - After a restart, recovery waits for the first unlock, because app storage is locked until then.
-- Each session stores its label name as it was when it ran, so renaming the fourth label never rewrites past sessions. Sessions from before labels existed read as Meditation. The History filter "Other" groups every name that is not one of the three built-in labels.
+- Each session stores its label name as it was when it ran, so typing a new fourth label never rewrites past sessions; only an explicit change from History does. Sessions from before labels existed read as Meditation. The History filter "Other" groups every name that is not one of the three built-in labels.
 - The CSV report prefixes any label starting with `=`, `+`, `-` or `@` with an apostrophe, so a spreadsheet cannot run it as a formula.
 - Import replaces only the session history. It keeps the running session and the phone's settings, and saves a copy of the old file first. Clear history deletes those copies too.
 

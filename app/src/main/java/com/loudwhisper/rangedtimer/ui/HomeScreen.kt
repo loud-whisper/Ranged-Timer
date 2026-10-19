@@ -47,6 +47,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.FilterChip
 import com.loudwhisper.rangedtimer.core.AppData
 import com.loudwhisper.rangedtimer.core.LabelChoice
+import com.loudwhisper.rangedtimer.core.DEFAULT_OTHER_NAME
+import com.loudwhisper.rangedtimer.core.MAX_LABEL_LENGTH
+import com.loudwhisper.rangedtimer.core.labelError
+import com.loudwhisper.rangedtimer.core.normalizeLabel
+import androidx.compose.material3.AssistChip
 import com.loudwhisper.rangedtimer.core.Settings
 import com.loudwhisper.rangedtimer.core.Outcome
 import com.loudwhisper.rangedtimer.core.Session
@@ -64,6 +69,7 @@ fun HomeScreen(
     setupComplete: Boolean,
     onRangeChange: (Int, Int) -> Unit,
     onLabelChoice: (LabelChoice) -> Unit,
+    onOtherName: (String) -> Unit,
     onStart: () -> Unit,
     onEndEarly: () -> Unit,
     onStopAlert: () -> Unit,
@@ -108,7 +114,7 @@ fun HomeScreen(
         }
 
         if (active == null) {
-            LabelChips(data.settings, onLabelChoice)
+            LabelChips(data.settings, onLabelChoice, onOtherName)
             Text("Set your range", style = MaterialTheme.typography.titleLarge)
             Text(
                 "The timer picks a moment between these two lengths and keeps it secret.",
@@ -132,7 +138,8 @@ fun HomeScreen(
             }
             Button(
                 onClick = onStart,
-                enabled = rangeError == null,
+                enabled = rangeError == null &&
+                    (data.settings.labelChoice != LabelChoice.OTHER || labelError(data.settings.otherLabelName) == null),
                 modifier = Modifier.fillMaxWidth().height(96.dp),
                 shape = RoundedCornerShape(24.dp),
             ) { Text("Start", style = MaterialTheme.typography.headlineSmall) }
@@ -217,15 +224,38 @@ private fun HoldToEndButton(onEnd: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LabelChips(settings: Settings, onChoice: (LabelChoice) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(
-            LabelChoice.MEDITATION to "Meditation",
-            LabelChoice.READING to "Reading",
-            LabelChoice.WORKOUT to "Workout",
-            LabelChoice.OTHER to settings.otherLabelName,
-        ).forEach { (choice, name) ->
-            FilterChip(selected = settings.labelChoice == choice, onClick = { onChoice(choice) }, label = { Text(name) })
+private fun LabelChips(settings: Settings, onChoice: (LabelChoice) -> Unit, onOtherName: (String) -> Unit) {
+    // Local text so typing stays smooth; every change is saved, and normalized only at Start.
+    var name by remember { mutableStateOf(settings.otherLabelName) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(
+                LabelChoice.MEDITATION to "Meditation",
+                LabelChoice.READING to "Reading",
+                LabelChoice.WORKOUT to "Workout",
+                LabelChoice.OTHER to (normalizeLabel(name) ?: DEFAULT_OTHER_NAME),
+            ).forEach { (choice, text) ->
+                FilterChip(selected = settings.labelChoice == choice, onClick = { onChoice(choice) }, label = { Text(text) })
+            }
+        }
+        if (settings.labelChoice == LabelChoice.OTHER) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.take(MAX_LABEL_LENGTH + 5); onOtherName(name) },
+                label = { Text("Label name") },
+                singleLine = true,
+                isError = labelError(name) != null,
+                supportingText = labelError(name)?.let { msg -> { Text(msg) } },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            val picks = settings.recentCustomLabels.filterNot { it.equals(name.trim(), ignoreCase = true) }
+            if (picks.isNotEmpty()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    picks.forEach { pick ->
+                        AssistChip(onClick = { name = pick; onOtherName(pick) }, label = { Text(pick) })
+                    }
+                }
+            }
         }
     }
 }

@@ -52,7 +52,10 @@ data class Settings(
     val ringtoneUri: String? = null,
     val theme: Theme = Theme.SYSTEM,
     val labelChoice: LabelChoice = LabelChoice.MEDITATION,
+    /** The name typed for the fourth label; normalized when a session starts. */
     val otherLabelName: String = DEFAULT_OTHER_NAME,
+    /** Up to five recent custom names, newest first, offered as one-tap picks. */
+    val recentCustomLabels: List<String> = emptyList(),
 )
 
 @Serializable

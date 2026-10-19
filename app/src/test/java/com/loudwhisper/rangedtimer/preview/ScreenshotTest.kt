@@ -52,7 +52,14 @@ class ScreenshotTest {
             )
         }
         val store = com.loudwhisper.rangedtimer.alarm.SessionController.store(androidx.test.core.app.ApplicationProvider.getApplicationContext())
-        store.save(store.load().copy(sessions = sample))
+        store.save(store.load().copy(
+            sessions = sample,
+            settings = store.load().settings.copy(
+                labelChoice = com.loudwhisper.rangedtimer.core.LabelChoice.OTHER,
+                otherLabelName = "HIIT",
+                recentCustomLabels = listOf("HIIT", "Cardio", "Guitar"),
+            ),
+        ))
         compose.activityRule.scenario.recreate()
         shot("1-timer")
         compose.onNodeWithText("Start").performClick()

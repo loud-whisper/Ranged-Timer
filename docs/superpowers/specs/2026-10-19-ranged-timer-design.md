@@ -214,3 +214,11 @@ Approved by the owner after v1.2.
 - History has a label filter: All, the three built-in labels, and the fourth chip, which groups every label name outside the built-in three. Period stats use the filtered sessions; 90-day cycles stay anchored to the first session of any label.
 - Settings adds "Export report (spreadsheet)": a CSV with Date, Start time, Label, Minutes sat, Minutes picked, Outcome, oldest first. Labels beginning with `=`, `+`, `-`, `@`, tab or carriage return get a leading apostrophe to block spreadsheet formula injection.
 - Earlier changes in v1.1 and v1.2: Clear history (with warning), bottom navigation, vertically centred timer screen, Test in 10 seconds moved to Settings, start vibration on the alarm channel, status bar icons follow the app theme.
+
+## Addendum 2026-10-19: typed fourth label, relabelling, period names (v1.4)
+
+- The fourth label is typed in a name box on the timer screen, shown when the fourth chip is selected. The chip shows the typed name. Settings no longer has a rename field. The typed name is normalized at Start (trimmed, 1 to 24 characters, any spelling of a built-in name maps to it). Start is disabled while the box is empty.
+- `Settings.recentCustomLabels` keeps the five most recent custom names, newest first, shown as one-tap picks under the name box.
+- History: tapping a session opens an inline editor in the list (built-in chips, recent names, a name box, Save and Cancel) to fix a session saved under the wrong label. It is inline rather than a dialog because a text field inside a dialog never settled under Robolectric, and an on-device freeze could not be ruled out from the build machine.
+- The History filter's fourth chip is always "Other" and groups every custom name.
+- Period buttons read "Last 7 days" to "Last 90 days"; comparisons read "vs the previous 7 days". The windows were already rolling; only the names changed.

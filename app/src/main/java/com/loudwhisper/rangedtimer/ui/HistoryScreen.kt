@@ -24,7 +24,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.remember
 import com.loudwhisper.rangedtimer.core.AppData
+import com.loudwhisper.rangedtimer.core.FIXED_LABELS
+import com.loudwhisper.rangedtimer.core.MAX_LABEL_LENGTH
+import com.loudwhisper.rangedtimer.core.labelError
+import com.loudwhisper.rangedtimer.core.normalizeLabel
 import com.loudwhisper.rangedtimer.core.CYCLE_DAYS
 import com.loudwhisper.rangedtimer.core.CycleSummary
 import com.loudwhisper.rangedtimer.core.LabelFilter
@@ -42,11 +50,12 @@ import java.time.ZoneId
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HistoryScreen(data: AppData) {
+fun HistoryScreen(data: AppData, onRelabel: (sessionId: String, label: String) -> Unit) {
     val zone = ZoneId.systemDefault()
     val today = LocalDate.now(zone)
     var window by rememberSaveable { mutableIntStateOf(7) }
     var filter by rememberSaveable { mutableStateOf(LabelFilter.ALL) }
+    var editing by remember { mutableStateOf<Session?>(null) }
 
     Column(
         Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -63,7 +72,7 @@ fun HistoryScreen(data: AppData) {
             LabelFilter.MEDITATION to "Meditation",
             LabelFilter.READING to "Reading",
             LabelFilter.WORKOUT to "Workout",
-            LabelFilter.OTHER to data.settings.otherLabelName,
+            LabelFilter.OTHER to "Other",
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             filterNames.forEach { (f, name) ->
@@ -109,7 +118,51 @@ fun HistoryScreen(data: AppData) {
         cycles(sessions, today, zone, anchor = anchor).forEach { CycleRow(it) }
 
         Text("Recent sessions", style = MaterialTheme.typography.titleLarge)
-        sessions.takeLast(30).asReversed().forEach { SessionRow(it) }
+        Text("Tap a session to change its label.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        sessions.takeLast(30).asReversed().forEach { s ->
+            if (editing?.id == s.id) {
+                RelabelEditor(
+                    session = s,
+                    recent = data.settings.recentCustomLabels,
+                    onCancel = { editing = null },
+                    onSave = { label -> onRelabel(s.id, label); editing = null },
+                )
+            } else {
+                SessionRow(s) { editing = s }
+            }
+        }
+    }
+}
+
+/** Edits a session's label in place in the list (no pop-up window). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun RelabelEditor(session: Session, recent: List<String>, onCancel: () -> Unit, onSave: (String) -> Unit) {
+    var text by remember { mutableStateOf(session.label) }
+    val normalized = normalizeLabel(text)
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Change label", fontWeight = FontWeight.SemiBold)
+            Text("${dateTimeOf(session.startEpochMillis)}, ${minutes(session.actualSeconds)} min", style = MaterialTheme.typography.bodySmall)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                (FIXED_LABELS + recent).distinctBy { it.lowercase() }.forEach { option ->
+                    FilterChip(selected = normalized == option, onClick = { text = option }, label = { Text(option) })
+                }
+            }
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it.take(MAX_LABEL_LENGTH + 5) },
+                label = { Text("Or type a name") },
+                singleLine = true,
+                isError = labelError(text) != null,
+                supportingText = labelError(text)?.let { msg -> { Text(msg) } },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onCancel) { Text("Cancel") }
+                TextButton(onClick = { normalized?.let(onSave) }, enabled = normalized != null && normalized != session.label) { Text("Save") }
+            }
+        }
     }
 }
 
@@ -128,7 +181,7 @@ private fun CycleRow(c: CycleSummary) {
 }
 
 @Composable
-private fun SessionRow(s: Session) {
+private fun SessionRow(s: Session, onClick: () -> Unit) {
     val sat = minutes(s.actualSeconds)
     val picked = minutes(s.pickedSeconds)
     val detail = when (s.outcome) {
@@ -136,7 +189,7 @@ private fun SessionRow(s: Session) {
         Outcome.ENDED_EARLY -> "Ended early: $sat of $picked min"
         Outcome.INTERRUPTED -> "Interrupted: $sat min recorded"
     }
-    Column(Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
             Text(dateTimeOf(s.startEpochMillis), modifier = Modifier.weight(1f))
             Text(detail)
