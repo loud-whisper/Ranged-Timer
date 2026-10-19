@@ -27,6 +27,8 @@ data class Session(
     val pickedSeconds: Long,
     val actualSeconds: Long,
     val outcome: Outcome,
+    /** The label as it was named when the session ran. Older files have none: Meditation. */
+    val label: String = DEFAULT_LABEL,
 )
 
 /**
@@ -40,6 +42,7 @@ data class ActiveSession(
     val startElapsedMillis: Long,
     val bootCount: Int,
     val pickedSeconds: Long,
+    val label: String = DEFAULT_LABEL,
 )
 
 @Serializable
@@ -48,6 +51,8 @@ data class Settings(
     val longestMinutes: Int = 90,
     val ringtoneUri: String? = null,
     val theme: Theme = Theme.SYSTEM,
+    val labelChoice: LabelChoice = LabelChoice.MEDITATION,
+    val otherLabelName: String = DEFAULT_OTHER_NAME,
 )
 
 @Serializable

@@ -37,6 +37,23 @@ class ScreenshotTest {
     @Test
     fun capture() {
         assumeTrue(System.getProperty("screenshots.dir") != null)
+        // Sample history: ten days of mixed labels so the History screen has something to show.
+        val zone = java.time.ZoneId.systemDefault()
+        val today = java.time.LocalDate.now(zone)
+        val labels = listOf("Meditation", "Meditation", "Reading", "Workout", "Meditation")
+        val sample = (0L..9L).filter { it != 3L && it != 7L }.mapIndexed { i, back ->
+            val minutes = 55L + (i * 7) % 30
+            com.loudwhisper.rangedtimer.core.Session(
+                id = "s$i",
+                startEpochMillis = today.minusDays(back).atTime(6, 30).atZone(zone).toInstant().toEpochMilli(),
+                pickedSeconds = minutes * 60, actualSeconds = minutes * 60,
+                outcome = com.loudwhisper.rangedtimer.core.Outcome.COMPLETED,
+                label = labels[i % labels.size],
+            )
+        }
+        val store = com.loudwhisper.rangedtimer.alarm.SessionController.store(androidx.test.core.app.ApplicationProvider.getApplicationContext())
+        store.save(store.load().copy(sessions = sample))
+        compose.activityRule.scenario.recreate()
         shot("1-timer")
         compose.onNodeWithText("Start").performClick()
         shot("2-in-session")

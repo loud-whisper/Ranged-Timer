@@ -204,3 +204,13 @@ All calculations live in pure Kotlin with no Android dependencies, so they can b
 ## Brain integration
 
 A one-line entry in `shared/projects/README.md` in `loud-whisper/claude-memory` pointing to this repository, added through a branch and pull request.
+
+## Addendum 2026-10-19: labels and report (v1.3)
+
+Approved by the owner after v1.2.
+
+- Label chips above Start: Meditation, Reading, Workout, and a fourth label whose name the owner sets in Settings (default "Other", up to 24 characters, cannot repeat a built-in name). The selected chip is remembered (`Settings.labelChoice`).
+- `Session.label` and `ActiveSession.label` store the label text at the time of the session. Missing labels in older files decode as "Meditation"; `schemaVersion` stays 1 because the change only adds optional fields.
+- History has a label filter: All, the three built-in labels, and the fourth chip, which groups every label name outside the built-in three. Period stats use the filtered sessions; 90-day cycles stay anchored to the first session of any label.
+- Settings adds "Export report (spreadsheet)": a CSV with Date, Start time, Label, Minutes sat, Minutes picked, Outcome, oldest first. Labels beginning with `=`, `+`, `-`, `@`, tab or carriage return get a leading apostrophe to block spreadsheet formula injection.
+- Earlier changes in v1.1 and v1.2: Clear history (with warning), bottom navigation, vertically centred timer screen, Test in 10 seconds moved to Settings, start vibration on the alarm channel, status bar icons follow the app theme.

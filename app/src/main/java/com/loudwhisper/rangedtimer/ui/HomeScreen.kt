@@ -42,7 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.FilterChip
 import com.loudwhisper.rangedtimer.core.AppData
+import com.loudwhisper.rangedtimer.core.LabelChoice
+import com.loudwhisper.rangedtimer.core.Settings
 import com.loudwhisper.rangedtimer.core.Outcome
 import com.loudwhisper.rangedtimer.core.Session
 import com.loudwhisper.rangedtimer.core.day
@@ -58,6 +63,7 @@ fun HomeScreen(
     alertRunning: Boolean,
     setupComplete: Boolean,
     onRangeChange: (Int, Int) -> Unit,
+    onLabelChoice: (LabelChoice) -> Unit,
     onStart: () -> Unit,
     onEndEarly: () -> Unit,
     onStopAlert: () -> Unit,
@@ -102,6 +108,7 @@ fun HomeScreen(
         }
 
         if (active == null) {
+            LabelChips(data.settings, onLabelChoice)
             Text("Set your range", style = MaterialTheme.typography.titleLarge)
             Text(
                 "The timer picks a moment between these two lengths and keeps it secret.",
@@ -131,7 +138,7 @@ fun HomeScreen(
             ) { Text("Start", style = MaterialTheme.typography.headlineSmall) }
         } else {
             Text(
-                "Session in progress",
+                "${active.label} in progress",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
@@ -208,25 +215,42 @@ private fun HoldToEndButton(onEnd: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LabelChips(settings: Settings, onChoice: (LabelChoice) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(
+            LabelChoice.MEDITATION to "Meditation",
+            LabelChoice.READING to "Reading",
+            LabelChoice.WORKOUT to "Workout",
+            LabelChoice.OTHER to settings.otherLabelName,
+        ).forEach { (choice, name) ->
+            FilterChip(selected = settings.labelChoice == choice, onClick = { onChoice(choice) }, label = { Text(name) })
+        }
+    }
+}
+
 @Composable
 private fun LastSessionCard(data: AppData) {
     val zone = ZoneId.systemDefault()
     val today = LocalDate.now(zone)
     val last: Session = data.sessions.lastOrNull() ?: return
     if (last.day(zone) != today || data.activeSession != null) return
-    val todayMinutes = minutes(dayTotals(data.sessions, zone)[today] ?: 0L)
+    val sameLabel = data.sessions.filter { it.label == last.label }
+    val todayMinutes = minutes(dayTotals(sameLabel, zone)[today] ?: 0L)
     val sat = minutes(last.actualSeconds)
     val picked = minutes(last.pickedSeconds)
 
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(last.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             when (last.outcome) {
                 Outcome.COMPLETED -> {
                     Text("Today: $todayMinutes minutes", style = MaterialTheme.typography.headlineSmall)
                     if (todayMinutes != sat) Text("This session: $sat minutes")
                 }
                 Outcome.ENDED_EARLY -> {
-                    Text("You sat $sat minutes.", style = MaterialTheme.typography.headlineSmall)
+                    Text("Ended early after $sat minutes.", style = MaterialTheme.typography.headlineSmall)
                     Text("The timer had picked $picked.")
                     if (todayMinutes != sat) Text("Today: $todayMinutes minutes")
                 }

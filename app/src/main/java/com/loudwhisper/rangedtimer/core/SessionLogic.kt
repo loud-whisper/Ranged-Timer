@@ -14,6 +14,7 @@ private fun ActiveSession.toSession(actualSeconds: Long, outcome: Outcome) = Ses
     pickedSeconds = pickedSeconds,
     actualSeconds = actualSeconds.coerceIn(0L, pickedSeconds),
     outcome = outcome,
+    label = label,
 )
 
 fun endEarly(active: ActiveSession, nowElapsed: Long): Session =

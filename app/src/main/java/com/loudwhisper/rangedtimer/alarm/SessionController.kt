@@ -9,6 +9,7 @@ import com.loudwhisper.rangedtimer.core.Session
 import com.loudwhisper.rangedtimer.core.alarmMatches
 import com.loudwhisper.rangedtimer.core.complete
 import com.loudwhisper.rangedtimer.core.endEarly
+import com.loudwhisper.rangedtimer.core.labelFor
 import com.loudwhisper.rangedtimer.core.onBoot
 import com.loudwhisper.rangedtimer.core.onOpen
 import com.loudwhisper.rangedtimer.core.pickSeconds
@@ -41,6 +42,7 @@ object SessionController {
                 startElapsedMillis = SystemClock.elapsedRealtime(),
                 bootCount = bootCount(ctx),
                 pickedSeconds = pickSeconds(data.settings.shortestMinutes, data.settings.longestMinutes),
+                label = labelFor(data.settings),
             )
             started = active
             data.copy(activeSession = active)

@@ -42,7 +42,7 @@ class AppFlowTest {
     @Test
     fun startHidesTimeSchedulesExactAlarmAndEndEarlyReveals() {
         compose.onNodeWithText("Start").assertIsDisplayed().performClick()
-        compose.onNodeWithText("Session in progress").assertIsDisplayed()
+        compose.onNodeWithText("Meditation in progress").assertIsDisplayed()
 
         val active = SessionController.store(ctx).load().activeSession!!
         assertTrue(active.pickedSeconds in 3600L..5400L)
@@ -62,7 +62,7 @@ class AppFlowTest {
         assertNull(data.activeSession)
         assertEquals(Outcome.ENDED_EARLY, data.sessions.single().outcome)
         assertNull(shadowOf(alarms).peekNextScheduledAlarm())
-        compose.onNodeWithText("You sat 0 minutes.").assertIsDisplayed()
+        compose.onNodeWithText("Ended early after 0 minutes.").assertIsDisplayed()
         compose.onNodeWithText("The timer had picked ${active.pickedSeconds.let { Math.round(it / 60.0) }}.").assertIsDisplayed()
     }
 
@@ -149,7 +149,7 @@ class AppFlowTest {
     @Test
     fun timerContentSitsInTheMiddleOfTheScreen() {
         val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
-        val top = compose.onNodeWithText("Set your range").fetchSemanticsNode().boundsInRoot.top
+        val top = compose.onNodeWithText("Meditation").fetchSemanticsNode().boundsInRoot.top
         val bottom = compose.onNodeWithText("Start").fetchSemanticsNode().boundsInRoot.bottom
         val middle = (top + bottom) / 2
         // Allow for the bottom tab bar taking space below the content area.
@@ -190,5 +190,42 @@ class AppFlowTest {
         compose.activityRule.scenario.recreate()
         compose.waitForIdle()
         assertTrue("light icons expected on dark theme", !lightIcons())
+    }
+
+    @Test
+    fun chosenLabelIsRecordedAndFiltersHistory() {
+        compose.onNodeWithText("Reading").performClick()
+        compose.onNodeWithText("Start").performClick()
+        compose.onNodeWithText("Reading in progress").assertIsDisplayed()
+        val active = SessionController.store(ctx).load().activeSession!!
+        assertEquals("Reading", active.label)
+        SessionController.onAlarm(ctx, active.id, isTest = false)
+        assertEquals("Reading", SessionController.store(ctx).load().sessions.single().label)
+
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("History").performClick()
+        compose.onAllNodesWithText("Workout")[0].performClick()
+        compose.onNodeWithText("No Workout sessions yet.").assertIsDisplayed()
+        compose.onAllNodesWithText("Reading")[0].performClick()
+        compose.onNodeWithText("Practiced on 1 of 1 day").assertIsDisplayed()
+    }
+
+    @Test
+    fun renamingOtherKeepsPastSessionNames() {
+        compose.onNodeWithText("Other").performClick()
+        val first = SessionController.start(ctx)!!
+        SessionController.onAlarm(ctx, first.id, isTest = false)
+        assertEquals("Other", SessionController.store(ctx).load().sessions.single().label)
+
+        compose.onNodeWithText("Settings").performClick()
+        compose.onNodeWithText("Fourth label").performScrollTo().performTextReplacement("Guitar")
+        compose.onNodeWithText("Save").performClick()
+        compose.waitForIdle()
+        val data = SessionController.store(ctx).load()
+        assertEquals("Guitar", data.settings.otherLabelName)
+        assertEquals("Other", data.sessions.single().label)
+
+        compose.onNodeWithText("Timer").performClick()
+        compose.onNodeWithText("Guitar").assertIsDisplayed()
     }
 }

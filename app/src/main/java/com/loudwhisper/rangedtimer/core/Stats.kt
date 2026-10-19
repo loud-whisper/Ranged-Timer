@@ -103,10 +103,13 @@ fun trend(dayTotals: Map<LocalDate, Long>, firstDay: LocalDate, from: LocalDate,
     return out
 }
 
-/** All 90-day cycles from the first session to today, newest first. */
-fun cycles(sessions: List<Session>, today: LocalDate, zone: ZoneId): List<CycleSummary> {
-    if (sessions.isEmpty()) return emptyList()
-    val firstDay = sessions.minOf { it.day(zone) }
+/**
+ * All 90-day cycles from the first session to today, newest first. [anchor] fixes where
+ * cycle 1 starts, so a filtered list (one label) keeps the same cycle boundaries as all sessions.
+ */
+fun cycles(sessions: List<Session>, today: LocalDate, zone: ZoneId, anchor: LocalDate? = null): List<CycleSummary> {
+    if (sessions.isEmpty() && anchor == null) return emptyList()
+    val firstDay = anchor ?: sessions.minOf { it.day(zone) }
     if (today.isBefore(firstDay)) return emptyList()
     val currentIndex = (ChronoUnit.DAYS.between(firstDay, today) / CYCLE_DAYS).toInt() + 1
     return (currentIndex downTo 1).map { n ->

@@ -10,6 +10,12 @@ import kotlin.math.roundToLong
 
 fun minutes(seconds: Long): Long = (seconds / 60.0).roundToLong()
 
+fun plural(n: Int, one: String, many: String = one + "s"): String = "$n " + if (n == 1) one else many
+
+/** "45 min" under an hour, otherwise "1.5 hours". */
+fun totalTime(hours: Double): String =
+    if (hours < 1.0) "${(hours * 60).roundToLong()} min" else "${oneDecimal(hours)} hours"
+
 fun oneDecimal(x: Double): String = String.format(Locale.getDefault(), "%.1f", x)
 
 fun whole(x: Double): String = x.roundToLong().toString()
@@ -35,12 +41,19 @@ fun periodName(days: Int): String = when (days) {
     else -> "$days days"
 }
 
+private fun previousName(days: Int): String = when (days) {
+    7 -> "week"
+    30 -> "month"
+    else -> periodName(days)
+}
+
 /** "Up 6 min/day vs the previous 3 weeks" style sentence. */
 fun changeSentence(change: Double, days: Int): String {
     val rounded = oneDecimal(abs(change))
+    val previous = previousName(days)
     return when {
-        abs(change) < 0.05 -> "Same as the previous ${periodName(days)}"
-        change > 0 -> "Up $rounded min/day vs the previous ${periodName(days)}"
-        else -> "Down $rounded min/day vs the previous ${periodName(days)}"
+        abs(change) < 0.05 -> "Same as the previous $previous"
+        change > 0 -> "Up $rounded min/day vs the previous $previous"
+        else -> "Down $rounded min/day vs the previous $previous"
     }
 }

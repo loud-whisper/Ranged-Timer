@@ -22,15 +22,15 @@ import kotlin.math.ceil
 import kotlin.math.max
 
 /**
- * One bar per day (minutes sat) with the trailing 7-day average drawn on top.
- * [days] runs oldest to newest; [trend] has a value for each of those days.
+ * One bar per day (minutes) with the trailing 7-day average drawn on top.
+ * [days] runs oldest to newest; [trend] gives the average for some of those days, by date.
  */
 @Composable
-fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Double>) {
+fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Pair<LocalDate, Double>>) {
     val barColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)
     val lineColor = MaterialTheme.colorScheme.primary
     val gridColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
-    val maxMinutes = max(days.maxOfOrNull { it.second / 60.0 } ?: 0.0, trend.maxOrNull() ?: 0.0)
+    val maxMinutes = max(days.maxOfOrNull { it.second / 60.0 } ?: 0.0, trend.maxOfOrNull { it.second } ?: 0.0)
     // Round the scale up to a friendly number so the top label is readable.
     val top = max(30.0, ceil(maxMinutes / 30.0) * 30.0)
 
@@ -39,7 +39,7 @@ fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Double>) {
         Canvas(Modifier.fillMaxWidth().height(180.dp)) {
             val n = days.size.coerceAtLeast(1)
             val slot = size.width / n
-            val barWidth = (slot * 0.7f).coerceAtLeast(1f)
+            val barWidth = (slot * 0.7f).coerceIn(1f, 24.dp.toPx())
             listOf(0.0, 0.5, 1.0).forEach { f ->
                 val y = (size.height * (1 - f)).toFloat()
                 drawLine(gridColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
@@ -55,12 +55,14 @@ fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Double>) {
                     )
                 }
             }
-            if (trend.size >= 2) {
+            val index = days.withIndex().associate { (i, d) -> d.first to i }
+            val points = trend.mapNotNull { (date, m) -> index[date]?.let { it to m } }
+            if (points.size >= 2) {
                 val path = Path()
-                trend.forEachIndexed { i, m ->
+                points.forEachIndexed { k, (i, m) ->
                     val x = i * slot + slot / 2
                     val y = (size.height - m / top * size.height).toFloat()
-                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    if (k == 0) path.moveTo(x, y) else path.lineTo(x, y)
                 }
                 drawPath(path, lineColor, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
             }

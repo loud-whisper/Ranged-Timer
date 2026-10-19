@@ -33,6 +33,7 @@ import com.loudwhisper.rangedtimer.alarm.AlertService
 import com.loudwhisper.rangedtimer.alarm.Notifications
 import com.loudwhisper.rangedtimer.alarm.SessionController
 import com.loudwhisper.rangedtimer.core.AppData
+import com.loudwhisper.rangedtimer.core.csvReport
 import com.loudwhisper.rangedtimer.ui.HistoryScreen
 import com.loudwhisper.rangedtimer.ui.HomeScreen
 import com.loudwhisper.rangedtimer.ui.RangedTimerTheme
@@ -112,6 +113,7 @@ class MainActivity : ComponentActivity() {
                                 data = data,
                                 alertRunning = alertRunning,
                                 setupComplete = setup.complete,
+                                onLabelChoice = { c -> data = store.update { it.copy(settings = it.settings.copy(labelChoice = c)) } },
                                 onRangeChange = { s, l ->
                                     data = store.update { it.copy(settings = it.settings.copy(shortestMinutes = s, longestMinutes = l)) }
                                 },
@@ -136,6 +138,11 @@ class MainActivity : ComponentActivity() {
                                 onImport = { text -> store.importFrom(text); refresh() },
                                 onClearHistory = { store.clearHistory(); refresh() },
                                 onTest = { SessionController.testIn10s(this@MainActivity) },
+                                onOtherName = { name -> data = store.update { it.copy(settings = it.settings.copy(otherLabelName = name)) } },
+                                onExportReport = { uri ->
+                                    val csv = csvReport(store.load().sessions, java.time.ZoneId.systemDefault())
+                                    contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) }
+                                },
                             )
                         }
                     }
