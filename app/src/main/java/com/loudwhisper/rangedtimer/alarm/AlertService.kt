@@ -46,6 +46,7 @@ class AlertService : Service() {
         )
         if (!running) {
             running = true
+            isRunning = true
             wakeLock = getSystemService(PowerManager::class.java)
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RangedTimer:alert")
                 .apply { acquire(ALERT_MILLIS + 10_000L) }
@@ -108,6 +109,7 @@ class AlertService : Service() {
         wakeLock?.let { if (it.isHeld) it.release() }
         stopForeground(STOP_FOREGROUND_REMOVE)
         running = false
+        isRunning = false
         super.onDestroy()
     }
 
@@ -115,6 +117,11 @@ class AlertService : Service() {
         const val ACTION_STOP = "com.loudwhisper.rangedtimer.STOP_ALERT"
         private const val EXTRA_TEST = "test"
         const val ALERT_MILLIS = 180_000L
+
+        /** True while an alert is sounding, so the app can show a big Stop button. */
+        @Volatile
+        var isRunning = false
+            private set
 
         fun start(ctx: Context, isTest: Boolean) {
             ctx.startForegroundService(Intent(ctx, AlertService::class.java).putExtra(EXTRA_TEST, isTest))
