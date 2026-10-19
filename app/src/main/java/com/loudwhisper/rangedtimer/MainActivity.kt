@@ -4,14 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -64,13 +69,28 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
-                    Column(Modifier.fillMaxSize().padding(padding)) {
-                        PrimaryTabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background) {
-                            listOf("Timer", "History", "Settings").forEachIndexed { i, label ->
-                                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label) })
+                Scaffold(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    bottomBar = {
+                        NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+                            listOf(
+                                "Timer" to R.drawable.ic_tab_timer,
+                                "History" to R.drawable.ic_tab_history,
+                                "Settings" to R.drawable.ic_tab_settings,
+                            ).forEachIndexed { i, (label, icon) ->
+                                NavigationBarItem(
+                                    selected = tab == i,
+                                    onClick = { tab = i },
+                                    icon = { Icon(painterResource(icon), contentDescription = null) },
+                                    label = { Text(label) },
+                                )
                             }
                         }
+                    },
+                ) { padding ->
+                    // Wide screens (tablets, unfolded phones) keep a comfortable column in the middle.
+                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+                    Box(Modifier.widthIn(max = 560.dp).fillMaxSize()) {
                         when (tab) {
                             0 -> HomeScreen(
                                 data = data,
@@ -96,8 +116,10 @@ class MainActivity : ComponentActivity() {
                                     contentResolver.openOutputStream(uri)?.use { store.exportTo(it) }
                                 },
                                 onImport = { text -> store.importFrom(text); refresh() },
+                                onClearHistory = { store.clearHistory(); refresh() },
                             )
                         }
+                    }
                     }
                 }
             }

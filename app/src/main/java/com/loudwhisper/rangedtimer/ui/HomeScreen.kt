@@ -7,6 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -71,12 +74,17 @@ fun HomeScreen(
     val longest = longestText.toIntOrNull()
     val rangeError = if (shortest == null || longest == null) "Enter whole minutes." else validateRange(shortest, longest)
 
+    // Centred on any screen size: the column is at least as tall as the screen,
+    // so short content sits in the middle and long content still scrolls.
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val screenHeight = maxHeight
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
+            .heightIn(min = screenHeight)
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
     ) {
         if (alertRunning) {
             Button(
@@ -125,7 +133,6 @@ fun HomeScreen(
                 shape = RoundedCornerShape(24.dp),
             ) { Text("Start", style = MaterialTheme.typography.headlineSmall) }
         } else {
-            Spacer(Modifier.height(24.dp))
             Text(
                 "Session in progress",
                 style = MaterialTheme.typography.headlineMedium,
@@ -139,7 +146,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(8.dp))
             HoldToEndButton(onEndEarly)
         }
 
@@ -155,6 +162,7 @@ fun HomeScreen(
             ) { Text("Test in 10 seconds") }
             testMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
         }
+    }
     }
 }
 

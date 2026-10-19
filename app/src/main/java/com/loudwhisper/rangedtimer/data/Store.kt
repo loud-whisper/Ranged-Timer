@@ -56,6 +56,16 @@ class Store(private val dir: File) {
         }
     }
 
+    /**
+     * Permanently deletes all recorded sessions, including the copies kept by import
+     * and corrupt-file recovery. Settings and a running session are kept.
+     */
+    fun clearHistory(): Unit = synchronized(LOCK) {
+        update { it.copy(sessions = emptyList()) }
+        dir.listFiles { f -> f.name.startsWith("ranged-timer.before-import-") || f.name.startsWith("ranged-timer.corrupt-") }
+            ?.forEach { it.delete() }
+    }
+
     companion object {
         const val FILE_NAME = "ranged-timer.json"
         private val LOCK = Any()

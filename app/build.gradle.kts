@@ -14,8 +14,8 @@ android {
         applicationId = "com.loudwhisper.rangedtimer"
         minSdk = 33
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     // The release key lives outside the repository. Override the location with
@@ -62,6 +62,7 @@ android {
                 "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
                 "--add-opens=java.base/java.io=ALL-UNNAMED",
             )
+            (project.findProperty("screenshots.dir") as String?)?.let { dir -> it.systemProperty("screenshots.dir", dir) }
         }
     }
 }

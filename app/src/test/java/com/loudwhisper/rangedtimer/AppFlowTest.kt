@@ -7,7 +7,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
@@ -123,5 +126,33 @@ class AppFlowTest {
         compose.onNodeWithText("60").performTextReplacement("120")
         compose.onNodeWithText("Shortest must not be more than Longest.").assertIsDisplayed()
         compose.onNodeWithText("Start").assertIsNotEnabled()
+    }
+
+    @Test
+    fun clearHistoryWarnsAndOnlyWipesAfterConfirm() {
+        val active = SessionController.start(ctx)!!
+        SessionController.onAlarm(ctx, active.id, isTest = false)
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("Settings").performClick()
+
+        compose.onAllNodesWithText("Clear history")[1].performScrollTo().performClick()
+        compose.onNodeWithText("Clearing history will wipe all records", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Cancel").performClick()
+        assertEquals(1, SessionController.store(ctx).load().sessions.size)
+
+        compose.onAllNodesWithText("Clear history")[1].performScrollTo().performClick()
+        compose.onNodeWithText("Proceed with full history wipe").performClick()
+        compose.waitForIdle()
+        assertTrue(SessionController.store(ctx).load().sessions.isEmpty())
+    }
+
+    @Test
+    fun timerContentSitsInTheMiddleOfTheScreen() {
+        val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+        val top = compose.onNodeWithText("Set your range").fetchSemanticsNode().boundsInRoot.top
+        val bottom = compose.onNodeWithText("Test in 10 seconds").fetchSemanticsNode().boundsInRoot.bottom
+        val middle = (top + bottom) / 2
+        // Allow for the bottom tab bar taking space below the content area.
+        assertTrue("content middle $middle vs screen ${root.height}", middle in root.height * 0.35f..root.height * 0.55f)
     }
 }

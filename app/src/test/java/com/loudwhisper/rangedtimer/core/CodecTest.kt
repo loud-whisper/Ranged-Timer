@@ -108,4 +108,18 @@ class CodecTest {
         assertTrue(store.importFrom("nope").isFailure)
         assertEquals(sample, store.load())
     }
+
+    @Test
+    fun `clear history removes sessions and backup copies but keeps settings and running session`() {
+        val store = Store(tmp.root)
+        store.save(sample)
+        store.importFrom(Codec.encode(sample)).getOrThrow()
+        File(tmp.root, "ranged-timer.corrupt-1.json").writeText("x")
+        store.clearHistory()
+        val after = store.load()
+        assertTrue(after.sessions.isEmpty())
+        assertEquals(sample.settings, after.settings)
+        assertEquals(sample.activeSession, after.activeSession)
+        assertEquals(listOf(Store.FILE_NAME), tmp.root.list()!!.toList())
+    }
 }

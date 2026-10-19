@@ -44,6 +44,7 @@ Decisions that must not be undone by accident:
 - **A session is saved the moment the alarm fires,** so it counts even if Stop is never tapped.
 - **The shutdown time cannot be captured.** Android 9 and later do not send the shutdown signal to apps that are not running. A session whose end passed while the phone was off is recorded at its picked length and marked interrupted.
 - **After a restart, recovery waits for the first unlock,** because app storage is locked until then.
+- **Clear history (Settings) deletes every session and the app's internal backup copies,** after a warning with "Proceed with full history wipe" and "Cancel". Settings and a running session are kept.
 - **Import replaces only the session history.** It keeps the running session and this phone's settings, and saves a copy of the old file first.
 
 ## Building
@@ -56,7 +57,8 @@ Requirements on the Fedora workstation (all already installed):
 ```bash
 cd ~/git/Ranged-Timer
 export JAVA_HOME=~/.jdks/jdk-21.0.12.1+1
-./gradlew testDebugUnitTest        # 51 tests: logic plus app flows under Robolectric
+./gradlew testDebugUnitTest        # 54 tests: logic plus app flows under Robolectric
+./gradlew testDebugUnitTest --tests '*ScreenshotTest*' -Pscreenshots.dir=/tmp/shots   # optional dark-mode screenshots
 ./gradlew assembleRelease          # signed APK at app/build/outputs/apk/release/app-release.apk
 ```
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -62,9 +63,11 @@ fun SettingsScreen(
     onRecheck: () -> Unit,
     onExport: (Uri) -> Unit,
     onImport: (String) -> Unit,
+    onClearHistory: () -> Unit,
 ) {
     val ctx = LocalContext.current
     var importCandidate by remember { mutableStateOf<String?>(null) }
+    var confirmClear by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
 
     val ringtonePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -156,6 +159,37 @@ fun SettingsScreen(
             OutlinedButton(onClick = { importer.launch(arrayOf("application/json", "application/octet-stream", "text/plain")) }) { Text("Import history") }
         }
         message?.let { Text(it) }
+
+        Text("Clear history", style = MaterialTheme.typography.titleLarge)
+        OutlinedButton(
+            onClick = { confirmClear = true },
+            enabled = data.sessions.isNotEmpty(),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+        ) { Text("Clear history") }
+    }
+
+    if (confirmClear) {
+        AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            title = { Text("Clear all history?") },
+            text = {
+                Text(
+                    "Clearing history will wipe all records, with no way of getting them back. " +
+                        "You can export your history first before clearing."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onClearHistory()
+                        confirmClear = false
+                        message = "History cleared."
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Proceed with full history wipe") }
+            },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Cancel") } },
+        )
     }
 
     importCandidate?.let { text ->
