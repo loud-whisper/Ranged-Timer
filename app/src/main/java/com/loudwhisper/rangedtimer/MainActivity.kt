@@ -3,7 +3,12 @@ package com.loudwhisper.rangedtimer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.DisposableEffect
+import com.loudwhisper.rangedtimer.alarm.Haptics
+import com.loudwhisper.rangedtimer.ui.isDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -57,6 +62,17 @@ class MainActivity : ComponentActivity() {
         refresh()
 
         setContent {
+            val dark = isDarkTheme(data.settings.theme)
+            // Status bar icons must contrast with the app's own theme, not the phone's.
+            DisposableEffect(dark) {
+                enableEdgeToEdge(
+                    statusBarStyle = if (dark) SystemBarStyle.dark(Color.TRANSPARENT)
+                    else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+                    navigationBarStyle = if (dark) SystemBarStyle.dark(Color.TRANSPARENT)
+                    else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+                )
+                onDispose {}
+            }
             RangedTimerTheme(data.settings.theme) {
                 var tab by rememberSaveable { mutableIntStateOf(0) }
 
@@ -99,9 +115,11 @@ class MainActivity : ComponentActivity() {
                                 onRangeChange = { s, l ->
                                     data = store.update { it.copy(settings = it.settings.copy(shortestMinutes = s, longestMinutes = l)) }
                                 },
-                                onStart = { SessionController.start(this@MainActivity); refresh() },
+                                onStart = {
+                                    if (SessionController.start(this@MainActivity) != null) Haptics.startConfirm(this@MainActivity)
+                                    refresh()
+                                },
                                 onEndEarly = { SessionController.endEarly(this@MainActivity); refresh() },
-                                onTest = { SessionController.testIn10s(this@MainActivity) },
                                 onStopAlert = { AlertService.stop(this@MainActivity); alertRunning = false },
                                 onOpenSettings = { tab = 2 },
                             )
@@ -117,6 +135,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onImport = { text -> store.importFrom(text); refresh() },
                                 onClearHistory = { store.clearHistory(); refresh() },
+                                onTest = { SessionController.testIn10s(this@MainActivity) },
                             )
                         }
                     }

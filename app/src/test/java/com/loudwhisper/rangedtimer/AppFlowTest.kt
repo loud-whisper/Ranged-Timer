@@ -150,9 +150,45 @@ class AppFlowTest {
     fun timerContentSitsInTheMiddleOfTheScreen() {
         val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
         val top = compose.onNodeWithText("Set your range").fetchSemanticsNode().boundsInRoot.top
-        val bottom = compose.onNodeWithText("Test in 10 seconds").fetchSemanticsNode().boundsInRoot.bottom
+        val bottom = compose.onNodeWithText("Start").fetchSemanticsNode().boundsInRoot.bottom
         val middle = (top + bottom) / 2
         // Allow for the bottom tab bar taking space below the content area.
         assertTrue("content middle $middle vs screen ${root.height}", middle in root.height * 0.35f..root.height * 0.55f)
+    }
+
+    @Test
+    fun testButtonLivesInSettingsNotOnTimer() {
+        compose.onNodeWithText("Test in 10 seconds").assertDoesNotExist()
+        compose.onNodeWithText("Settings").performClick()
+        compose.onNodeWithText("Test in 10 seconds").performScrollTo().performClick()
+        assertNotNull(shadowOf(alarms).peekNextScheduledAlarm())
+        assertTrue(SessionController.store(ctx).load().sessions.isEmpty())
+    }
+
+    @Test
+    fun startGivesAShortVibration() {
+        compose.onNodeWithText("Start").performClick()
+        val vibrator = shadowOf(ctx.getSystemService(android.os.Vibrator::class.java))
+        assertTrue(vibrator.isVibrating)
+    }
+
+    @Test
+    fun statusBarIconsFollowTheAppTheme() {
+        fun lightIcons(): Boolean {
+            var light = false
+            compose.activityRule.scenario.onActivity {
+                light = androidx.core.view.WindowCompat.getInsetsController(it.window, it.window.decorView).isAppearanceLightStatusBars
+            }
+            return light
+        }
+        SessionController.store(ctx).update { it.copy(settings = it.settings.copy(theme = com.loudwhisper.rangedtimer.core.Theme.LIGHT)) }
+        compose.activityRule.scenario.recreate()
+        compose.waitForIdle()
+        assertTrue("dark icons expected on light theme", lightIcons())
+
+        SessionController.store(ctx).update { it.copy(settings = it.settings.copy(theme = com.loudwhisper.rangedtimer.core.Theme.DARK)) }
+        compose.activityRule.scenario.recreate()
+        compose.waitForIdle()
+        assertTrue("light icons expected on dark theme", !lightIcons())
     }
 }

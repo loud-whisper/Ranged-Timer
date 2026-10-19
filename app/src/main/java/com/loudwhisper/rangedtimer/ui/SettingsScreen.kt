@@ -64,10 +64,12 @@ fun SettingsScreen(
     onExport: (Uri) -> Unit,
     onImport: (String) -> Unit,
     onClearHistory: () -> Unit,
+    onTest: () -> Unit,
 ) {
     val ctx = LocalContext.current
     var importCandidate by remember { mutableStateOf<String?>(null) }
     var confirmClear by remember { mutableStateOf(false) }
+    var testMessage by remember { mutableStateOf<String?>(null) }
     var message by remember { mutableStateOf<String?>(null) }
 
     val ringtonePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -117,6 +119,23 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        Text("Check the alert", style = MaterialTheme.typography.titleLarge)
+        Text(
+            "Put the phone on Silent, tap the button and lock the screen. It should vibrate within 10 seconds. " +
+                "Worth repeating after a phone update. Tests are never saved to your history.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(
+            onClick = {
+                onTest()
+                testMessage = "Test alert in 10 seconds. Lock the screen now."
+            },
+            enabled = data.activeSession == null,
+        ) { Text("Test in 10 seconds") }
+        if (data.activeSession != null) Text("Available when no session is running.", style = MaterialTheme.typography.bodySmall)
+        testMessage?.let { Text(it) }
 
         Text("Sound", style = MaterialTheme.typography.titleLarge)
         val ringtoneName = remember(data.settings.ringtoneUri) { ringtoneTitle(ctx, data.settings.ringtoneUri) }

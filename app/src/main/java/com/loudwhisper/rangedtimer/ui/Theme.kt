@@ -57,11 +57,14 @@ private val Light = lightColorScheme(
 )
 
 @Composable
+fun isDarkTheme(theme: Theme): Boolean = when (theme) {
+    Theme.SYSTEM -> isSystemInDarkTheme()
+    Theme.LIGHT -> false
+    Theme.DARK -> true
+}
+
+@Composable
 fun RangedTimerTheme(theme: Theme, content: @Composable () -> Unit) {
-    val dark = when (theme) {
-        Theme.SYSTEM -> isSystemInDarkTheme()
-        Theme.LIGHT -> false
-        Theme.DARK -> true
-    }
+    val dark = isDarkTheme(theme)
     MaterialTheme(colorScheme = if (dark) Dark else Light, content = content)
 }

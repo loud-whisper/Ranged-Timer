@@ -14,17 +14,15 @@ android {
         applicationId = "com.loudwhisper.rangedtimer"
         minSdk = 33
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
     }
 
-    // The release key lives outside the repository. Override the location with
-    // -PrangedTimer.signingProps=/path/to/keystore.properties if it moves.
-    val signingProps = file(
-        (findProperty("rangedTimer.signingProps") as String?)
-            ?: "/mnt/wdc/Gold/.secrets/ranged-timer/keystore.properties"
-    )
-    if (signingProps.exists()) {
+    // The release key lives outside the repository. Point to its properties file with
+    // rangedTimer.signingProps in ~/.gradle/gradle.properties or -PrangedTimer.signingProps=...
+    // Without it, release builds are unsigned and debug builds work as usual.
+    val signingProps = (findProperty("rangedTimer.signingProps") as String?)?.let { file(it) }
+    if (signingProps != null && signingProps.exists()) {
         val p = Properties().apply { signingProps.inputStream().use { load(it) } }
         signingConfigs {
             create("release") {

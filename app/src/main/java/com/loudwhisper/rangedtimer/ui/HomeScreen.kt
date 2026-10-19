@@ -25,7 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,14 +60,12 @@ fun HomeScreen(
     onRangeChange: (Int, Int) -> Unit,
     onStart: () -> Unit,
     onEndEarly: () -> Unit,
-    onTest: () -> Unit,
     onStopAlert: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val active = data.activeSession
     var shortestText by remember { mutableStateOf(data.settings.shortestMinutes.toString()) }
     var longestText by remember { mutableStateOf(data.settings.longestMinutes.toString()) }
-    var testMessage by remember { mutableStateOf<String?>(null) }
 
     val shortest = shortestText.toIntOrNull()
     val longest = longestText.toIntOrNull()
@@ -151,17 +148,6 @@ fun HomeScreen(
         }
 
         LastSessionCard(data)
-
-        if (active == null) {
-            OutlinedButton(
-                onClick = {
-                    onTest()
-                    testMessage = "Test alert in 10 seconds. Lock the screen now to check it on Silent or Vibrate."
-                },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Test in 10 seconds") }
-            testMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-        }
     }
     }
 }
