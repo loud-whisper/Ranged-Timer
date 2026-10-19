@@ -8,38 +8,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.loudwhisper.rangedtimer.core.Theme
 
-// Calm, low-contrast palette: deep moss for dark, warm paper for light, sand as the accent.
+// Dark is true OLED black with neutral greys; light is plain off-white. Sand is the only accent.
 private val Dark = darkColorScheme(
     primary = Color(0xFFD9C7A7),
-    onPrimary = Color(0xFF2A2419),
-    secondary = Color(0xFF9DB3A4),
-    onSecondary = Color(0xFF14201A),
-    background = Color(0xFF161D1A),
-    onBackground = Color(0xFFE6E1D8),
-    surface = Color(0xFF161D1A),
-    onSurface = Color(0xFFE6E1D8),
-    surfaceVariant = Color(0xFF24302B),
-    onSurfaceVariant = Color(0xFFBEC7C1),
-    surfaceContainer = Color(0xFF1E2723),
-    surfaceContainerHigh = Color(0xFF24302B),
-    outline = Color(0xFF5C6A64),
+    onPrimary = Color(0xFF000000),
+    secondary = Color(0xFFB0B0B0),
+    onSecondary = Color(0xFF000000),
+    background = Color(0xFF000000),
+    onBackground = Color(0xFFE8E8E8),
+    surface = Color(0xFF000000),
+    onSurface = Color(0xFFE8E8E8),
+    surfaceVariant = Color(0xFF1C1C1C),
+    onSurfaceVariant = Color(0xFFA8A8A8),
+    surfaceContainer = Color(0xFF121212),
+    surfaceContainerHigh = Color(0xFF1C1C1C),
+    outline = Color(0xFF3A3A3A),
     error = Color(0xFFF2B8A8),
 )
 
 private val Light = lightColorScheme(
-    primary = Color(0xFF5E6F5F),
+    primary = Color(0xFF2B2B2B),
     onPrimary = Color(0xFFFFFFFF),
     secondary = Color(0xFF8A7556),
     onSecondary = Color(0xFFFFFFFF),
-    background = Color(0xFFF6F2EA),
-    onBackground = Color(0xFF26302C),
-    surface = Color(0xFFF6F2EA),
-    onSurface = Color(0xFF26302C),
-    surfaceVariant = Color(0xFFE8E2D6),
-    onSurfaceVariant = Color(0xFF4F5953),
-    surfaceContainer = Color(0xFFEFEAE0),
-    surfaceContainerHigh = Color(0xFFE8E2D6),
-    outline = Color(0xFF9AA19B),
+    background = Color(0xFFFAFAFA),
+    onBackground = Color(0xFF1F1F1F),
+    surface = Color(0xFFFAFAFA),
+    onSurface = Color(0xFF1F1F1F),
+    surfaceVariant = Color(0xFFEAEAEA),
+    onSurfaceVariant = Color(0xFF555555),
+    surfaceContainer = Color(0xFFF0F0F0),
+    surfaceContainerHigh = Color(0xFFE6E6E6),
+    outline = Color(0xFFA0A0A0),
     error = Color(0xFFA64B36),
 )
 
