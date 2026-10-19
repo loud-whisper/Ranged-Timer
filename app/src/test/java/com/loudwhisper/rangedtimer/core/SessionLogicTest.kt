@@ -48,22 +48,7 @@ class SessionLogicTest {
     }
 
     @Test
-    fun `boot after end with shutdown caps actual at shutdown`() {
-        val withShutdown = active.copy(shutdownEpochMillis = 1_000_000L + 40 * 60_000L)
-        val d = onBoot(withShutdown, nowEpoch = 1_000_000L + 90 * 60_000L) as BootDecision.FireNow
-        assertEquals(Outcome.INTERRUPTED, d.session.outcome)
-        assertEquals(40 * 60L, d.session.actualSeconds)
-    }
-
-    @Test
-    fun `boot after end with shutdown after end uses picked`() {
-        val withShutdown = active.copy(shutdownEpochMillis = 1_000_000L + 80 * 60_000L)
-        val d = onBoot(withShutdown, nowEpoch = 1_000_000L + 90 * 60_000L) as BootDecision.FireNow
-        assertEquals(74 * 60L, d.session.actualSeconds)
-    }
-
-    @Test
-    fun `boot after end without shutdown uses picked`() {
+    fun `boot after end records picked as interrupted`() {
         val d = onBoot(active, nowEpoch = 1_000_000L + 90 * 60_000L) as BootDecision.FireNow
         assertEquals(Outcome.INTERRUPTED, d.session.outcome)
         assertEquals(74 * 60L, d.session.actualSeconds)
@@ -71,10 +56,9 @@ class SessionLogicTest {
 
     @Test
     fun `rebase moves the elapsed start into the new boot`() {
-        val r = rebase(active.copy(shutdownEpochMillis = 5L), nowEpoch = 1_000_000L + 10 * 60_000L, nowElapsed = 20_000L, bootCount = 5)
+        val r = rebase(active, nowEpoch = 1_000_000L + 10 * 60_000L, nowElapsed = 20_000L, bootCount = 5)
         assertEquals(20_000L - 10 * 60_000L, r.startElapsedMillis)
         assertEquals(5, r.bootCount)
-        assertNull(r.shutdownEpochMillis)
     }
 
     @Test

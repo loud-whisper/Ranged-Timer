@@ -15,7 +15,7 @@ class CodecTest {
 
     private val sample = AppData(
         settings = Settings(shortestMinutes = 55, longestMinutes = 95, ringtoneUri = "content://x", theme = Theme.DARK),
-        activeSession = ActiveSession("a", 1000L, 50L, 3, 4000L, shutdownEpochMillis = 2000L),
+        activeSession = ActiveSession("a", 1000L, 50L, 3, 4000L),
         sessions = listOf(
             Session("s1", 1L, 4000L, 4000L, Outcome.COMPLETED),
             Session("s2", 2L, 5000L, 1200L, Outcome.ENDED_EARLY),

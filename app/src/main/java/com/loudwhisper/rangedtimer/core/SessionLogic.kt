@@ -22,12 +22,15 @@ fun endEarly(active: ActiveSession, nowElapsed: Long): Session =
 fun complete(active: ActiveSession): Session =
     active.toSession(active.pickedSeconds, Outcome.COMPLETED)
 
-/** After a restart, elapsed time has reset, so the decision uses the wall clock. */
+/**
+ * After a restart, elapsed time has reset, so the decision uses the wall clock.
+ * Android does not tell a stopped app when the phone shuts down, so a session whose
+ * end passed while the phone was off is recorded at its picked length, marked interrupted.
+ */
 fun onBoot(active: ActiveSession, nowEpoch: Long): BootDecision {
     val end = active.startEpochMillis + active.pickedSeconds * 1000
     if (end > nowEpoch) return BootDecision.Reschedule(end - nowEpoch)
-    val actual = active.shutdownEpochMillis?.let { (it - active.startEpochMillis) / 1000 } ?: active.pickedSeconds
-    return BootDecision.FireNow(active.toSession(actual, Outcome.INTERRUPTED))
+    return BootDecision.FireNow(active.toSession(active.pickedSeconds, Outcome.INTERRUPTED))
 }
 
 /** Re-expresses a session that survived a restart in the new boot's elapsed clock. */
@@ -35,7 +38,6 @@ fun rebase(active: ActiveSession, nowEpoch: Long, nowElapsed: Long, bootCount: I
     active.copy(
         startElapsedMillis = nowElapsed - (nowEpoch - active.startEpochMillis),
         bootCount = bootCount,
-        shutdownEpochMillis = null,
     )
 
 /** When the app opens and the end passed without an alert, the session is recorded as interrupted. */

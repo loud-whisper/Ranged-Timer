@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Back up only the history file; never temporary or set-aside copies. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="ranged-timer.json" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="ranged-timer.json" />
+    </device-transfer>
+</data-extraction-rules>

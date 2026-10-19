@@ -106,10 +106,12 @@ Alarm usage is normally allowed through Silent mode and Do Not Disturb. This is 
 ### Reboot and recovery
 
 - Elapsed realtime resets on reboot, so persist both the start wall-clock time and start elapsed-realtime.
-- On `ACTION_SHUTDOWN` (sent on normal power-off and usually on low-battery power-off), save the shutdown wall-clock time into the active session.
-- On `BOOT_COMPLETED` (and `LOCKED_BOOT_COMPLETED` if storage allows), reload the active session:
+- Android does not deliver the shutdown broadcast to apps that are not running (manifest receivers stopped receiving `ACTION_SHUTDOWN` in Android 9), so the shutdown time cannot be captured. (Revised 2026-10-19 during implementation.)
+- On `BOOT_COMPLETED`, reload the active session:
   - If the picked end is still in the future (computed from wall-clock time, since elapsed realtime no longer applies), reschedule the alarm for the remaining time.
-  - If the picked end already passed while the phone was off, alert immediately. Record outcome `interrupted` with actual length = shutdown time minus start, capped at the picked length. If no shutdown time was saved, use the picked length.
+  - If the picked end already passed while the phone was off, alert immediately and record outcome `interrupted` at the picked length.
+  - `LOCKED_BOOT_COMPLETED` is not used: app storage is unavailable until the first unlock, so recovery runs after the owner unlocks the phone.
+- On `MY_PACKAGE_REPLACED` (app update), reschedule the active session's alarm.
 - If the app is opened and finds an active session whose end passed with no recorded alert (the alarm was missed while the phone was on), record outcome `interrupted` with the picked length and tell the owner the alert was missed.
 
 ### Battery

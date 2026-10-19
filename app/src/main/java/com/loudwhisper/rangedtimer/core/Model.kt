@@ -40,7 +40,6 @@ data class ActiveSession(
     val startElapsedMillis: Long,
     val bootCount: Int,
     val pickedSeconds: Long,
-    val shutdownEpochMillis: Long? = null,
 )
 
 @Serializable
