@@ -14,10 +14,10 @@ The timer gives one alert per session. It does not run a series of intervals.
 
 - Picks a random end time inside your range, anywhere from 0 to 1000 minutes. Every second in the range is equally likely.
 - Keeps the picked time hidden while the session runs, including from the lock screen and status bar.
-- Checks the phone's sound mode when the time comes: on Silent or Vibrate it vibrates, with sound on it plays the ringtone you chose and vibrates. It stops when you tap Stop or after 3 minutes.
+- Checks the phone's sound mode when the time comes: on Silent or Vibrate it vibrates, with sound on it plays the ringtone you chose and vibrates. It stops when you tap Stop or after 3 minutes. With the app open, a large Stop alert button sits near the bottom of the screen, within reach of your thumb.
 - Gives a short buzz when you press Start, so you know the session is running without looking.
 - Lets you end early by holding a button for 1.5 seconds (a quick tap does nothing). It records what you sat and shows what it had picked: "You sat 52 minutes. The timer had picked 74."
-- Keeps a history on the phone: average minutes per day over the last 7, 21, 30, 60 and 90 days (rolling, counted back from today), days practiced, average session length, a daily graph with a 7-day trend line, and 90-day cycles you can compare with each other.
+- Keeps a history on the phone: average minutes per day over the last 7, 21, 30, 60 and 90 days (rolling, counted back from today), days practiced, average session length, a daily graph with a 7-day trend line and dashed guide lines every 30 minutes (tap a bar to see that day's minutes), and 90-day cycles you can compare with each other.
 - Tags each session with a label: Meditation, Reading, Workout, or a fourth one you type on the timer screen (Cardio one day, HIIT the next). Your last five names come back as one-tap picks. A session saved under the wrong label can be changed later from History.
 - Shows History for everything or one label at a time.
 - Exports a spreadsheet report (CSV) with one row per session: date, start time, label, minutes done, minutes picked and how it ended.
@@ -72,7 +72,7 @@ The design document is [docs/DESIGN.md](docs/DESIGN.md). Read it before changing
 |---|---|
 | Data shapes: sessions, settings, the running session | `core/Model.kt` |
 | Random pick and range rules | `core/DurationPicker.kt` |
-| Averages, trend line, 90-day cycles | `core/Stats.kt` |
+| Averages, trend line, 90-day cycles, graph scale | `core/Stats.kt` |
 | End early, restart and missed-alarm rules | `core/SessionLogic.kt` |
 | Labels and the History filter | `core/Labels.kt` |
 | Spreadsheet report (CSV) | `core/Report.kt` |

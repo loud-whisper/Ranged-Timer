@@ -131,3 +131,22 @@ fun cycles(sessions: List<Session>, today: LocalDate, zone: ZoneId, anchor: Loca
         )
     }
 }
+
+/** Vertical scale of the History graph: the top value and the dashed guide lines, in minutes. */
+data class GraphScale(val topMinutes: Int, val lineMinutes: List<Int>)
+
+private const val GRAPH_STEP_MINUTES = 30
+private const val GRAPH_MAX_LINES = 8
+
+/**
+ * Guide lines every 30 minutes (30, 60, 90, 120...). Long days widen the step to a larger
+ * multiple of 30 so the graph never shows more than 8 lines. The top is the first line at
+ * or above [maxMinutes], and at least one step.
+ */
+fun graphScale(maxMinutes: Double): GraphScale {
+    val raw = kotlin.math.ceil(maxMinutes.coerceAtLeast(0.0) / GRAPH_STEP_MINUTES).toInt().coerceAtLeast(1)
+    val stepsPerLine = (raw + GRAPH_MAX_LINES - 1) / GRAPH_MAX_LINES
+    val step = GRAPH_STEP_MINUTES * stepsPerLine
+    val lines = (raw + stepsPerLine - 1) / stepsPerLine
+    return GraphScale(step * lines, (1..lines).map { it * step })
+}

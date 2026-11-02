@@ -13,7 +13,7 @@ The timer, history and settings screens use Kotlin and Jetpack Compose. Pure cal
 - Use `setExactAndAllowWhileIdle` on the elapsed-realtime clock. `setAlarmClock` would expose the selected end in system UI and is unsuitable here.
 - While running, show the start time and session state without an end time or countdown. End early requires a 1.5-second hold.
 - Read the ringer mode when the alert fires. Silent/Vibrate uses vibration; normal mode uses the selected ringtone and vibration. Use alarm audio/vibration attributes.
-- Record completion when the alarm fires, so the history survives an untapped Stop button. Stop or three minutes ends the foreground alert service and releases its wake lock.
+- Record completion when the alarm fires, so the history survives an untapped Stop button. Stop or three minutes ends the foreground alert service and releases its wake lock. While the alert sounds, the timer screen pins a large Stop alert button near the bottom of the screen. The system notification's Stop action stays where Android places it.
 - After reboot and first unlock, reschedule a future end using the persisted wall clock. An end missed while powered off is recorded as interrupted at the picked duration. App updates reschedule an active alarm.
 - Notifications, exact-alarm permission and battery exemptions belong to the installed app identity. Recheck them on each device.
 
@@ -21,7 +21,7 @@ The timer, history and settings screens use Kotlin and Jetpack Compose. Pure cal
 
 Each finished session stores its ID, start timestamp, chosen seconds, actual seconds, outcome and label. Outcomes are completed, ended early or interrupted. Built-in labels are Meditation, Reading and Workout. A fourth label is typed on the timer screen; trim it, accept 1 to 24 characters, and keep the five most recent custom names. Editing a preference never changes existing session labels. Only a deliberate History edit relabels a saved session.
 
-History windows cover the last 7, 21, 30, 60 or 90 calendar days, including today. Assign a session to its local start day. Skipped days count as zero. A new history uses the available days since its first session as the denominator. Compare equal adjacent windows only when enough history exists. The graph uses a trailing seven-day mean.
+History windows cover the last 7, 21, 30, 60 or 90 calendar days, including today. Assign a session to its local start day. Skipped days count as zero. A new history uses the available days since its first session as the denominator. Compare equal adjacent windows only when enough history exists. The graph uses a trailing seven-day mean. Dashed guide lines mark every 30 minutes up to the first line at or above the tallest bar or trend point; when that would need more than eight lines, the step widens to a larger multiple of 30 (`graphScale` in `core/Stats.kt`). Tapping a bar shows that day's date and rounded minutes above the graph; tapping it again, or changing the period or label filter, clears the selection.
 
 Ninety-day cycles start on the date of the first session of any label and remain anchored there when a label filter changes. Cycle summaries are derived from sessions, not stored independently.
 

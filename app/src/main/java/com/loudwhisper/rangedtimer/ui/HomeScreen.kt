@@ -92,17 +92,11 @@ fun HomeScreen(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .heightIn(min = screenHeight)
-            .padding(24.dp),
+            .padding(24.dp)
+            // Leave room so the pinned Stop alert button never covers the last item.
+            .padding(bottom = if (alertRunning) 120.dp else 0.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
     ) {
-        if (alertRunning) {
-            Button(
-                onClick = onStopAlert,
-                modifier = Modifier.fillMaxWidth().height(96.dp),
-                shape = RoundedCornerShape(24.dp),
-            ) { Text("Stop alert", style = MaterialTheme.typography.headlineSmall) }
-        }
-
         if (!setupComplete) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
                 Column(Modifier.padding(16.dp)) {
@@ -162,6 +156,18 @@ fun HomeScreen(
         }
 
         LastSessionCard(data)
+    }
+    // Pinned near the bottom of the screen, within easy reach of a thumb.
+    if (alertRunning) {
+        Button(
+            onClick = onStopAlert,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(24.dp)
+                .fillMaxWidth()
+                .height(96.dp),
+            shape = RoundedCornerShape(24.dp),
+        ) { Text("Stop alert", style = MaterialTheme.typography.headlineSmall) }
     }
     }
 }

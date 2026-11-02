@@ -8,7 +8,10 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
@@ -25,6 +28,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
@@ -269,5 +273,31 @@ class AppFlowTest {
         compose.onNodeWithText("History").performClick()
         compose.onNodeWithText("Last 7 days").assertIsDisplayed()
         compose.onNodeWithText("Last 90 days").assertIsDisplayed()
+    }
+    @Test
+    fun tappingABarShowsThatDaysMinutes() {
+        val active = SessionController.start(ctx)!!
+        SessionController.onAlarm(ctx, active.id, isTest = false)
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("History").performClick()
+        compose.onNodeWithText("Tap a bar to see that day's time.").performScrollTo().assertIsDisplayed()
+        // Today is the last bar, at the right edge of the graph.
+        compose.onNodeWithTag("minutesGraph").performScrollTo().performTouchInput { click(Offset(right - 2f, centerY)) }
+        val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE d MMM"))
+        val minutes = Math.round(active.pickedSeconds / 60.0)
+        compose.onNodeWithText("$today: $minutes min").assertIsDisplayed()
+    }
+
+    @Test
+    fun stopAlertButtonSitsNearTheBottomOfTheScreen() {
+        val service = Robolectric.buildService(AlertService::class.java).create().startCommand(0, 1)
+        try {
+            compose.activityRule.scenario.recreate()
+            val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+            val bottom = compose.onNodeWithText("Stop alert").assertIsDisplayed().fetchSemanticsNode().boundsInRoot.bottom
+            assertTrue("Stop alert bottom $bottom vs screen ${root.height}", bottom > root.height * 0.75f)
+        } finally {
+            service.destroy()
+        }
     }
 }
