@@ -46,7 +46,8 @@ fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Pair<LocalDate, 
     val barColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)
     val selectedColor = MaterialTheme.colorScheme.secondary
     val lineColor = MaterialTheme.colorScheme.primary
-    val gridColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    // Text grey at half strength: visible on OLED black and on the light off-white, still behind the bars.
+    val gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
     val labelStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
     val measurer = rememberTextMeasurer()
     val maxMinutes = max(days.maxOfOrNull { it.second / 60.0 } ?: 0.0, trend.maxOfOrNull { it.second } ?: 0.0)
@@ -88,7 +89,7 @@ fun MinutesGraph(days: List<Pair<LocalDate, Long>>, trend: List<Pair<LocalDate, 
             val barWidth = (slot * 0.7f).coerceIn(1f, 24.dp.toPx())
 
             drawLine(gridColor, Offset(gutter, size.height), Offset(size.width, size.height), strokeWidth = 1f)
-            val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx()))
+            val dash = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))
             scale.lineMinutes.forEach { m ->
                 val y = yOf(m.toDouble())
                 drawLine(gridColor, Offset(gutter, y), Offset(size.width, y), strokeWidth = 1.dp.toPx(), pathEffect = dash)

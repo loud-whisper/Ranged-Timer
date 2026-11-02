@@ -275,7 +275,16 @@ class AppFlowTest {
         compose.onNodeWithText("Last 90 days").assertIsDisplayed()
     }
     @Test
-    fun tappingABarShowsThatDaysMinutes() {
+    fun tappingABarShowsThatDaysMinutes() = tapBarShowsMinutes()
+
+    @Test
+    fun tappingABarShowsThatDaysMinutesInDarkTheme() {
+        val store = SessionController.store(ctx)
+        store.save(store.load().copy(settings = store.load().settings.copy(theme = com.loudwhisper.rangedtimer.core.Theme.DARK)))
+        tapBarShowsMinutes()
+    }
+
+    private fun tapBarShowsMinutes() {
         val active = SessionController.start(ctx)!!
         SessionController.onAlarm(ctx, active.id, isTest = false)
         compose.activityRule.scenario.recreate()
