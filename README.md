@@ -117,4 +117,4 @@ Launch edition: 1.0, published 2026-10-25. Application ID: com.loudwhisper.range
 
 Release certificate SHA-256, from 1.1 on: 6C:51:2C:16:35:94:50:73:E5:67:4F:4B:D7:A8:EE:EE:19:75:C4:C4:74:52:EB:D2:3F:1B:52:E1:36:9F:51:6F. Verify this fingerprint before installing an APK.
 
-Version 1.0 was signed with a different key (93:05:C0:AC:2F:F7:B5:9E:EB:32:5E:87:4C:53:D1:E1:D3:8E:E0:59:E2:C4:4D:45:F5:63:4F:32:38:1D:E2:D8), so 1.1 cannot install over it. To move from 1.0 to 1.1: export your history in Settings, uninstall 1.0, install 1.1, then import the backup. Settings and phone permissions need to be set again.
+Version 1.0 was signed with a different key (93:05:C0:AC:2F:F7:B5:9E:EB:32:5E:87:4C:53:D1:E1:D3:8E:E0:59:E2:C4:4D:45:F5:63:4F:32:38:1D:E2:D8), so 1.1 cannot install over it. To start fresh, uninstall 1.0 and install 1.1. To keep your history, export it in Settings first, then uninstall 1.0, install 1.1 and import the backup; settings and phone permissions need to be set again.
